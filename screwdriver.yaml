@@ -48,7 +48,7 @@ jobs:
       # In "publish_npm", we perform the actual publishing
       # NPM reference document - https://docs.npmjs.com/cli/publish
       - publish_npm: echo Run npm publish command to publish to the registry
-      - set-meta: meta set publish_url http://artifacts.com/nodejs/${GIT_COMMIT}
+      - set-meta: meta set publish_url http://artifacts.com/nodejs/${SD_BUILD_SHA}
       
     # Allowed secrets block.
     # This list of secrets that are explicitly allowed to be exposed during the
@@ -62,11 +62,11 @@ jobs:
       
   deploy-to-prod:
     steps:
-      - trigger: echo Trigger downstream jobs with ${GIT_COMMIT}
+      - trigger: echo Trigger downstream jobs with ${SD_BUILD_SHA}
       
   rollback:
       steps:
-      - trigger: echo Rollback to ${GIT_COMMIT}
+      - trigger: echo Rollback to ${SD_BUILD_SHA}
     
   prod-gq1:
     requires: [~deploy-to-prod, ~rollback]
