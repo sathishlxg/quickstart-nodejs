@@ -57,3 +57,27 @@ jobs:
       # to the NPM Registry. Our secret is stored as "NPM_TOKEN", and is accessible
       # in the build as an environment variable with the same name
       - NPM_TOKEN
+      
+  detached-job:
+    steps:
+      - set-meta: meta set coverage 90
+      - trigger: echo Trigger downstream jobs
+      
+  prod-gq1:
+    requires: [detached-job]
+    steps:
+      - deploy: echo deployed to production environment
+      
+  prod-bf1:
+    requires: [detached-job]
+    steps:
+      - deploy: echo deployed to production environment
+      
+  ycpi:
+    requires: [prod-bf1, prod-gq1]
+    steps:
+      - display: echo ${meta get coverage}
+      - cleanup: echo Deployment succeeded
+    settings:
+        email: [sathishkumar_thangaraj@yahoo.com]
+   
