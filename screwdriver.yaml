@@ -48,6 +48,8 @@ jobs:
       # In "publish_npm", we perform the actual publishing
       # NPM reference document - https://docs.npmjs.com/cli/publish
       - publish_npm: echo Run npm publish command to publish to the registry
+      - set-meta: meta set publish_url http://artifacts.com/nodejs/${GIT_COMMIT}
+      
     # Allowed secrets block.
     # This list of secrets that are explicitly allowed to be exposed during the
     # "publish" Job.
@@ -58,26 +60,29 @@ jobs:
       # in the build as an environment variable with the same name
       - NPM_TOKEN
       
-  detached-job:
+  deploy-to-prod:
     steps:
-      - set-meta: meta set coverage 90
-      - trigger: echo Trigger downstream jobs
+      - trigger: echo Trigger downstream jobs with ${GIT_COMMIT}
       
+  rollback:
+      steps:
+      - trigger: echo Rollback to ${GIT_COMMIT}
+    
   prod-gq1:
-    requires: [detached-job]
+    requires: [~deploy-to-prod, ~rollback]
     steps:
       - deploy: echo deployed to production environment
       
   prod-bf1:
-    requires: [detached-job]
+    requires: [~deploy-to-prod, ~rollback]
     steps:
       - deploy: echo deployed to production environment
       
   ycpi:
     requires: [prod-bf1, prod-gq1]
     steps:
-      - display: echo ${meta get coverage}
+      - display: meta get publish_url
       - cleanup: echo Deployment succeeded
     settings:
         email: [sathishkumar_thangaraj@yahoo.com]
-   
+  
