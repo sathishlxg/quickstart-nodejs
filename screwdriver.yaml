@@ -20,7 +20,7 @@ jobs:
     # Jobs defined with "requires: ~sd@123:main" are started by job "main" from pipeline "123".
     # Jobs defined with "requires: main" are started after "main" is done.
     # Jobs defined with "requires: [deploy-west, deploy-east] are started after "deploy-west" and "deploy-east" are both done running successfully.
-    requires: [~pr, ~commit]
+    requires: [~pr]
     # Steps is the ordered list of commands to execute.
     # Each step takes the form "step_name: command_to_run". The "step_name" is a
     # convenient label to reference it by. The "command_to_run" is the single 
@@ -32,10 +32,16 @@ jobs:
       # The next step is "test". It tests your NodeJS package
       # NPM reference document - https://docs.npmjs.com/cli/test
       - test: npm test
+      
+  component:
+    requires: [~commit]
+    steps:
+       - set-meta: meta set publish_url http://artifacts.com/nodejs/${SD_BUILD_SHA}
+
   # We define another Job called "publish". In this stage of the pipeline, we intend
   # on publishing our package to the NPM Registry.
   publish:
-    requires: main
+    requires: component
     steps:
       # "set_access" is the first step that is executed. We want the community to use
       # our package, so we enable publicly accessible
@@ -48,7 +54,6 @@ jobs:
       # In "publish_npm", we perform the actual publishing
       # NPM reference document - https://docs.npmjs.com/cli/publish
       - publish_npm: echo Run npm publish command to publish to the registry
-      - set-meta: meta set publish_url http://artifacts.com/nodejs/${SD_BUILD_SHA}
       
     # Allowed secrets block.
     # This list of secrets that are explicitly allowed to be exposed during the
