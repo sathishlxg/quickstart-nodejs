@@ -29,3 +29,8 @@ $ npm install
 $ npm test
 ```
 
+### Run app
+
+```
+$ node server.js
+```
